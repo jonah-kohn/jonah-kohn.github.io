@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+
+body, html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background-color: #1e5175;
+  color: white;
+}
+
+h1, h2, h3, h4, p {
+  font-family: Roboto;
+}
+
+h1, h2 {
+  font-weight: 300;
+}
+
+h3, h4 {
+  font-weight: 400;
+}
+
+p {
+  font-weight: 400;
+}
+
+img, svg {
+  object-fit: contain;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.main-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.particles-container {
+  display: flex;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.content-container {
+  display: flex;
+  margin-left: 25%;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-direction: column;
+}
+
+.links-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.contact-container i {
+  margin-right: 1rem;
+  color: white;
+}
+
+.contact-container img {
+  margin-right: 1rem;
+  color: white;
+  height: 24px;
+  width: 24px;
+}
+
+.divider {
+  width: 100%;
+  border-top: solid 1px white;
+}
+
+.mobile {
+  display: none;
+}
+
+@media(max-width: 767px) {
+  .main-container {
+    padding: 2rem;
+    width: calc(100% - 4rem);
+    height: calc(100% - 4rem);
+  }
+
+  .particles-container {
+    width: calc(100% - 4rem);
+    height: calc(100% - 4rem);
+  }
+
+  .content-container {
+    margin-left: 0;
+  }
+
+  .desktop {
+    display: none;
+  }
+
+  .mobile {
+    display: flex;
+  }
+}
