@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Live Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js" type="text/javascript"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js" type="text/javascript"></script>
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css" rel="stylesheet" />
     <style>
         body { margin:0; padding:0; }
@@ -15,69 +15,16 @@
 
   <body>
 
-
     <div id='map'></div>
     <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoidGhlcmV2ZXJiIiwiYSI6ImNsdDNsZXUwdzE1YnMya3F4anZwcGR2a3UifQ.restoftokenhere';
+    mapboxgl.accessToken = 'token here';
     var map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/outdoors-v11',
-        center: [-118.828503,36.898231],
-        pitch: 40,
-        zoom: 5.8,
-        minZoom: 3.75
+        style: 'mapbox://styles/thereverb/clt3lln3w00am01o86qj004ew',
+        // style: 'mapbox://styles/mapbox/outdoors-v11',
     });
 
     map.addControl(new mapboxgl.NavigationControl());
-
-    map.on('load', () => {
-        map.addSource('route', {
-            'type': 'geojson',
-            'data': {
-                'type': 'Feature',
-                'properties': {},
-                'geometry': {
-                    'type': 'LineString',
-                    'coordinates': [
-                        [-122.483696, 37.833818],
-                        [-122.483482, 37.833174],
-                        [-122.483396, 37.8327],
-                        [-122.483568, 37.832056],
-                        [-122.48404, 37.831141],
-                        [-122.48404, 37.830497],
-                        [-122.483482, 37.82992],
-                        [-122.483568, 37.829548],
-                        [-122.48507, 37.829446],
-                        [-122.4861, 37.828802],
-                        [-122.486958, 37.82931],
-                        [-122.487001, 37.830802],
-                        [-122.487516, 37.831683],
-                        [-122.488031, 37.832158],
-                        [-122.488889, 37.832971],
-                        [-122.489876, 37.832632],
-                        [-122.490434, 37.832937],
-                        [-122.49125, 37.832429],
-                        [-122.491636, 37.832564],
-                        [-122.492237, 37.833378],
-                        [-122.493782, 37.833683]
-                    ]
-                }
-            }
-        });
-        map.addLayer({
-            'id': 'route',
-            'type': 'line',
-            'source': 'route',
-            'layout': {
-                'line-join': 'round',
-                'line-cap': 'round'
-            },
-            'paint': {
-                'line-color': '#888',
-                'line-width': 8
-            }
-        });
-    });
 
     </script>
   </body>
