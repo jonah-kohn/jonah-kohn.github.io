@@ -17,14 +17,25 @@
 
     <div id='map'></div>
     <script>
-    mapboxgl.accessToken = 'token here';
-    var map = new mapboxgl.Map({
+    mapboxgl.accessToken = 'pk.eyJ1IjoiamFzb25kYW50cmFpbCIsImEiOiJjbHk0b3RuZXIwM2J4MmxzN25wNXkxcjY2In0.mEpqLeUuzU9-oP4yLltuYA';
+    const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/thereverb/clt3lln3w00am01o86qj004ew',
-        // style: 'mapbox://styles/mapbox/outdoors-v11',
+        style: 'mapbox://styles/mapbox/outdoors-v11',
     });
+    map.on('load', () => {
+      map.addSource('mapData', {
+        'type': 'geojson',
+        'data': 'map_data/data.geojson'
+      });
+      map.addLayer({
+            'id': 'reference-cdt-layer',
+            'type': 'line',
+            'source': 'mapData',
+        });
+    })
 
-    map.addControl(new mapboxgl.NavigationControl());
+   
+    // map.addControl(new mapboxgl.NavigationControl());
 
     </script>
   </body>
