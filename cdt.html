@@ -1,43 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <title>Live Map</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js" type="text/javascript"></script>
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css" rel="stylesheet" />
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-      </style>
-  </head>
+<head>
+  <meta charset="UTF-8">
+  <title>Live Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
 
-  <body>
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
 
-    <div id='map'></div>
-    <script>
+    .mapboxgl-popup {
+      max-width: 400px;
+      font:
+        12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id='map'></div>
+  <script>
+    function formatDateToMountainTime(date) {
+      // Define the Mountain Time timezone
+      const mountainTimeZone = 'America/Denver';
+
+      // Format the date in a human-friendly way
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZone: mountainTimeZone,
+        timeZoneName: 'short'
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      return formatter.format(date);
+    }
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiamFzb25kYW50cmFpbCIsImEiOiJjbHk0b3RuZXIwM2J4MmxzN25wNXkxcjY2In0.mEpqLeUuzU9-oP4yLltuYA';
     const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/outdoors-v11',
+      container: 'map',
+      style: 'mapbox://styles/mapbox/outdoors-v11',
     });
+
     map.on('load', () => {
-      map.addSource('mapData', {
-        'type': 'geojson',
-        'data': 'map_data/data.geojson'
-      });
-      map.addLayer({
-            'id': 'reference-cdt-layer',
-            'type': 'line',
-            'source': 'mapData',
+      const images = [
+        { url: './img/filled-circle.png', id: 'waypoint' },
+        { url: './img/current_marker.png', id: 'latest' },
+      ]
+      Promise.all(
+        images.map(img => new Promise((resolve, reject) => {
+          map.loadImage(img.url, function (error, res) {
+            if (error) throw error;
+            map.addImage(img.id, res)
+            resolve();
+          })
+        }))
+      ).then(() => {
+        console.log("Images Loaded");
+        map.addSource('cdtReference', {
+          'type': 'geojson',
+          'data': 'map_data/cdt_data.geojson'
         });
-    })
+        map.addSource('mapData', {
+          'type': 'geojson',
+          'data': 'https://trail-tracker-mapdata.s3.us-west-1.amazonaws.com/data.geojson'
+        });
+        map.addLayer({
+          'id': 'reference-cdt-layer',
+          'type': 'line',
+          'source': 'cdtReference',
+        });
+        map.addLayer({
+          'id': 'coord-line-layer',
+          'type': 'line',
+          'source': 'mapData',
+          'paint': {
+            'line-width': 5,
+            'line-color': "#FF0000"
+          },
+          'filter': ["==", "GPS Coordinate Line", ["get", "name"]],
 
-   
-    // map.addControl(new mapboxgl.NavigationControl());
+        });
+        map.addLayer({
+          'id': 'waypoints-layer',
+          'type': 'symbol',
+          'source': 'mapData',
+          'layout': {
+            'icon-image': "waypoint"
+          },
+          'minzoom': 8,
+          'filter': ['all', ['==', '$type', 'Point'], ["!has", "latest"]]
+        });
+        map.addLayer({
+          'id': 'latest-marker-layer',
+          'type': 'symbol',
+          'source': 'mapData',
+          'layout': {
+            'icon-image': "latest",
+          },
+          'filter': ['all', ['==', '$type', 'Point'], ["has", "latest"]]
+        });
+      }
+      );
+    });
 
-    </script>
-  </body>
+    map.addControl(new mapboxgl.NavigationControl());
+
+    // Create a popup, but don't add it to the map yet.
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    const symbolLayers = ['waypoints-layer', 'latest-marker-layer']
+    for (layerName of symbolLayers) {
+      map.on('mouseenter', layerName, (e) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+
+        // Copy coordinates array.
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const timestamp_utc = new Date(e.features[0].properties.ts_utc)
+        const formatted_date = formatDateToMountainTime(timestamp_utc)
+
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        if (['mercator', 'equirectangular'].includes(map.getProjection().name)) {
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+        }
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(coordinates).setHTML(formatted_date).addTo(map);
+      });
+
+      map.on('mouseleave', layerName, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+    }
+
+  </script>
+</body>
 
 </html>
