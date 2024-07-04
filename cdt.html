@@ -58,8 +58,7 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoiamFzb25kYW50cmFpbCIsImEiOiJjbHk0b3RuZXIwM2J4MmxzN25wNXkxcjY2In0.mEpqLeUuzU9-oP4yLltuYA';
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/thereverb/clt3lln3w00am01o86qj004ew',
-      center: [43.83,-110.70],
+      style: 'mapbox://styles/mapbox/outdoors-v11',
     });
 
     map.on('load', () => {
@@ -84,6 +83,11 @@
         map.addSource('mapData', {
           'type': 'geojson',
           'data': 'https://trail-tracker-mapdata.s3.us-west-1.amazonaws.com/data.geojson'
+        });
+        map.addLayer({
+          'id': 'reference-cdt-layer',
+          'type': 'line',
+          'source': 'cdtReference',
         });
         map.addLayer({
           'id': 'coord-line-layer',
