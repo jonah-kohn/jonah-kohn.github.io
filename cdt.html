@@ -144,6 +144,7 @@
         const timestamp_utc = new Date(e.features[0].properties.ts_utc)
         const formatted_date = formatDateToMountainTime(timestamp_utc)
 
+        const popup_html = `${formatted_date}<br>${coordinates.map((x) => x.toFixed(6))}`
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
         // over the copy being pointed to.
@@ -155,7 +156,7 @@
 
         // Populate the popup and set its coordinates
         // based on the feature found.
-        popup.setLngLat(coordinates).setHTML(formatted_date).addTo(map);
+        popup.setLngLat(coordinates).setHTML(popup_html).addTo(map);
       });
 
       map.on('mouseleave', layerName, () => {
